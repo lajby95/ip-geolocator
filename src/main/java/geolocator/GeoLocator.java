@@ -8,7 +8,11 @@ import com.google.gson.Gson;
 
 import com.google.common.net.UrlEscapers;
 
+import com.sun.tools.javac.Main;
 import org.apache.commons.io.IOUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class for obtaining geolocation information about an IP address or host
@@ -16,6 +20,8 @@ import org.apache.commons.io.IOUtils;
  * service.
  */
 public class GeoLocator {
+
+    private static Logger logger = LoggerFactory.getLogger(GeoLocator.class);
 
     /**
      * URI of the geolocation service.
@@ -56,16 +62,27 @@ public class GeoLocator {
         } else {
             url = new URL(GEOLOCATOR_SERVICE_URI);
         }
+        logger.info("URL: {}", url);
         String s = IOUtils.toString(url, "UTF-8");
+        logger.info("JSON: {}", s);
         return GSON.fromJson(s, GeoLocation.class);
     }
 
     public static void main(String[] args) throws IOException {
         try {
             String arg = args.length > 0 ? args[0] : null;
-            System.out.println(new GeoLocator().getGeoLocation(arg));
+            logger.debug("args: {}", args);
+
+            GeoLocator geolocator = new GeoLocator();
+
+            GeoLocation geolocation = geolocator.getGeoLocation(arg);
+            logger.info(geolocation.toString());
+
+            logger.info("Country: {}", geolocation.getCountry());
+            logger.info("Region: {}", geolocation.getRegion());
+
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            logger.error(e.getMessage());
         }
     }
 
